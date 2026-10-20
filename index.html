@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>WoW Forever Dungeon Comp Selector</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --background: #06101c;
+            --panel: #101c2b;
+            --panel-light: #17263a;
+            --panel-dark: #09131f;
+            --border: #344963;
+
+            --text: #f4f7fb;
+            --muted: #a7b6c9;
+
+            --gold: #f5c451;
+            --gold-hover: #ffdc82;
+
+            --tank: #438de8;
+            --healer: #48bc72;
+            --dps: #df5959;
+
+            --good: #65dc90;
+            --warning: #ffc766;
+            --bad: #ff7b7b;
+
+            --primary: #c278ff;
+            --emergency: #ff7777;
+            --interrupt: #5cbcff;
+            --conditional: #f4bd54;
+            --soft: #63d0a3;
+            --utility: #aebed0;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 35px 18px;
+
+            color: var(--text);
+            font-family: Arial, Helvetica, sans-serif;
+
+            background:
+                radial-gradient(
+                    circle at top,
+                    #263f61 0%,
+                    var(--background) 55%,
+                    #02070d 100%
+                );
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1180px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 28px;
+            text-align: center;
+        }
+
+        .eyebrow {
+            margin: 0 0 8px;
+
+            color: var(--gold);
+            font-size: 13px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(30px, 5vw, 48px);
+        }
+
+        .intro {
+            max-width: 800px;
+            margin: 15px auto 0;
+
+            color: var(--muted);
+            line-height: 1.65;
+        }
+
+        .main-card {
+            padding: 26px;
+
+            border: 1px solid var(--border);
+            border-radius: 22px;
+
+            background: rgba(16, 28, 43, 0.97);
+            box-shadow: 0 20px 55px rgba(0, 0, 0, 0.45);
+        }
+
+        .selection-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+        }
+
+        .role-card {
+            padding: 20px;
+
+            border: 1px solid var(--border);
+            border-top-width: 4px;
+            border-radius: 15px;
+
+            background: var(--panel-light);
+        }
+
+        .role-card.tank {
+            border-top-color: var(--tank);
+        }
+
+        .role-card.healer {
+            border-top-color: var(--healer);
+        }
+
+        .role-card.dps {
+            border-top-color: var(--dps);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+
+            font-size: 17px;
+            font-weight: bold;
+        }
+
+        select {
+            width: 100%;
+            min-height: 48px;
+            padding: 11px 12px;
+
+            color: white;
+            font-size: 15px;
+
+            border: 1px solid #566e8a;
+            border-radius: 9px;
+            outline: none;
+
+            background: #08131f;
+            cursor: pointer;
+        }
+
+        select:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(245, 196, 81, 0.17);
+        }
+
+        select:disabled {
+            cursor: not-allowed;
+            opacity: 0.45;
+        }
+
+        option {
+            color: white;
+            background: #08131f;
+        }
+
+        .armor-display {
+            min-height: 23px;
+            margin-top: 11px;
+
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .armor-badge {
+            display: inline-block;
+            padding: 4px 9px;
+
+            border: 1px solid #526984;
+            border-radius: 999px;
+
+            color: #e7edf6;
+            background: #091522;
+        }
+
+        .status-box {
+            margin-top: 22px;
+            padding: 18px;
+
+            border: 1px solid var(--border);
+            border-radius: 14px;
+
+            text-align: center;
+            background: var(--panel-dark);
+        }
+
+        .status-box.valid {
+            border-color: #347e50;
+            background: rgba(33, 101, 59, 0.2);
+        }
+
+        .status-box.invalid {
+            border-color: #954646;
+            background: rgba(110, 38, 38, 0.2);
+        }
+
+        .status-title {
+            margin-bottom: 7px;
+
+            color: var(--gold);
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .status-text {
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .status-box.valid .status-text {
+            color: var(--good);
+        }
+
+        .status-box.invalid .status-text {
+            color: var(--bad);
+        }
+
+        .results {
+            display: none;
+            margin-top: 22px;
+        }
+
+        .results.visible {
+            display: block;
+        }
+
+        .score-card {
+            display: grid;
+            grid-template-columns: 170px 1fr;
+            gap: 25px;
+            align-items: center;
+
+            padding: 24px;
+
+            border: 1px solid var(--border);
+            border-radius: 17px;
+
+            background: #091420;
+        }
+
+        .score-circle {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+
+            width: 145px;
+            height: 145px;
+            margin: 0 auto;
+
+            border: 7px solid var(--gold);
+            border-radius: 50%;
+
+            background: #111f30;
+        }
+
+        .score-number {
+            font-size: 40px;
+            font-weight: bold;
+        }
+
+        .score-label {
+            color: var(--muted);
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+
+        .rating-title {
+            margin: 0 0 7px;
+            color: var(--gold);
+            font-size: 27px;
+        }
+
+        .stars {
+            margin-bottom: 10px;
+
+            color: var(--gold);
+            font-size: 26px;
+            letter-spacing: 3px;
+        }
+
+        .rating-description {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.55;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+
+            margin-top: 18px;
+        }
+
+        .detail-card {
+            padding: 20px;
+
+            border: 1px solid var(--border);
+            border-radius: 15px;
+
+            background: var(--panel-light);
+        }
+
+        .detail-card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .detail-card h3 {
+            margin: 0 0 15px;
+            color: var(--gold);
+        }
+
+        .detail-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .detail-list li {
+            margin-bottom: 9px;
+            padding: 10px;
+
+            color: #d3deea;
+            line-height: 1.45;
+
+            border-radius: 8px;
+            background: rgba(5, 13, 23, 0.58);
+        }
+
+        .detail-list li:last-child {
+            margin-bottom: 0;
+        }
+
+        .category-badge {
+            display: inline-block;
+            margin-right: 7px;
+            padding: 3px 7px;
+
+            border-radius: 6px;
+
+            color: #07101a;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .category-primary {
+            background: var(--primary);
+        }
+
+        .category-emergency {
+            background: var(--emergency);
+        }
+
+        .category-interrupt {
+            background: var(--interrupt);
+        }
+
+        .category-conditional {
+            background: var(--conditional);
+        }
+
+        .category-soft {
+            background: var(--soft);
+        }
+
+        .category-utility {
+            background: var(--utility);
+        }
+
+        .score-breakdown {
+            display: grid;
+            gap: 10px;
+        }
+
+        .score-row {
+            display: grid;
+            grid-template-columns: 145px 1fr 55px;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .score-row-label {
+            color: #d8e1ec;
+            font-size: 14px;
+        }
+
+        .score-bar {
+            height: 10px;
+            overflow: hidden;
+
+            border-radius: 999px;
+            background: #06101a;
+        }
+
+        .score-bar-fill {
+            height: 100%;
+            width: 0;
+
+            border-radius: 999px;
+            background: var(--gold);
+        }
+
+        .score-value {
+            color: var(--muted);
+            font-size: 13px;
+            text-align: right;
+        }
+
+        .legend {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .legend-item {
+            padding: 11px;
+
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.45;
+
+            border-radius: 9px;
+            background: #09131f;
+        }
+
+        .legend-item strong {
+            display: block;
+            margin-bottom: 4px;
+            color: white;
+        }
+
+        .button-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+
+            margin-top: 24px;
+        }
+
+        button {
+            min-width: 175px;
+            padding: 12px 20px;
+
+            color: #101820;
+            font-size: 15px;
+            font-weight: bold;
+
+            border: none;
+            border-radius: 9px;
+
+            background: var(--gold);
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: var(--gold-hover);
+        }
+
+        button.secondary {
+            color: white;
+
+            border: 1px solid #566d88;
+            background: #1a2a3e;
+        }
+
+        button.secondary:hover {
+            background: #253a54;
+        }
+
+        .notice {
+            margin-top: 22px;
+            padding: 16px;
+
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.6;
+
+            border: 1px solid #293d55;
+            border-radius: 12px;
+
+            background: rgba(7, 15, 25, 0.65);
+        }
+
+        .notice strong {
+            color: var(--gold);
+        }
+
+        @media (max-width: 850px) {
+            .selection-grid,
+            .details-grid,
+            .legend {
+                grid-template-columns: 1fr;
+            }
+
+            .detail-card.full-width {
+                grid-column: auto;
+            }
+
+            .score-card {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 520px) {
+            body {
+                padding: 20px 12px;
+            }
+
+            .main-card {
+                padding: 17px;
+            }
+
+            .score-row {
+                grid-template-columns: 105px 1fr 48px;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <header>
+        <p class="eyebrow">PvE Dungeon Party Builder</p>
+
+        <h1>WoW Forever Comp Selector</h1>
+
+        <p class="intro">
+            Create a three-player composition with different armor types.
+            Crowd control is weighted by practical dungeon usefulness.
+            A reliable Polymorph, Sap or Freezing Trap receives more value
+            than slows, roots, conditional control or minor debuffs.
+        </p>
+    </header>
+
+    <main class="main-card">
+
+        <section class="selection-grid">
+
+            <div class="role-card tank">
+                <label for="tank">🛡️ Tank</label>
+
+                <select id="tank">
+                    <option value="">Select Tank</option>
+                </select>
+
+                <div id="tankArmor" class="armor-display">
+                    No profile selected
+                </div>
+            </div>
+
+            <div class="role-card healer">
+                <label for="healer">💚 Healer</label>
+
+                <select id="healer" disabled>
+                    <option value="">Select Healer</option>
+                </select>
+
+                <div id="healerArmor" class="armor-display">
+                    Select a tank first
+                </div>
+            </div>
+
+            <div class="role-card dps">
+                <label for="dps">⚔️ DPS</label>
+
+                <select id="dps" disabled>
+                    <option value="">Select DPS</option>
+                </select>
+
+                <div id="dpsArmor" class="armor-display">
+                    Select a tank first
+                </div>
+            </div>
+
+        </section>
+
+        <section id="statusBox" class="status-box">
+            <div class="status-title">Composition Status</div>
+
+            <div id="statusText" class="status-text">
+                Select a tank to begin.
+            </div>
+        </section>
+
+        <section id="results" class="results">
+
+            <div class="score-card">
+
+                <div id="scoreCircle" class="score-circle">
+                    <div id="scoreNumber" class="score-number">0</div>
+                    <div class="score-label">out of 100</div>
+                </div>
+
+                <div>
+                    <h2 id="ratingTitle" class="rating-title">
+                        Dungeon Synergy
+                    </h2>
+
+                    <div id="stars" class="stars">
+                        ☆☆☆☆☆
+                    </div>
+
+                    <p
+                        id="ratingDescription"
+                        class="rating-description"
+                    ></p>
+                </div>
+
+            </div>
+
+            <div class="details-grid">
+
+                <div class="detail-card">
+                    <h3>Score Breakdown</h3>
+                    <div id="scoreBreakdown" class="score-breakdown"></div>
+                </div>
+
+                <div class="detail-card">
+                    <h3>Armor Distribution</h3>
+                    <ul id="armorList" class="detail-list"></ul>
+                </div>
+
+                <div class="detail-card">
+                    <h3>Primary Hard CC</h3>
+                    <ul id="primaryList" class="detail-list"></ul>
+                </div>
+
+                <div class="detail-card">
+                    <h3>Emergency Hard CC</h3>
+                    <ul id="emergencyList" class="detail-list"></ul>
+                </div>
+
+                <div class="detail-card">
+                    <h3>Reliable Interrupts</h3>
+                    <ul id="interruptList" class="detail-list"></ul>
+                </div>
+
+                <div class="detail-card">
+                    <h3>Conditional CC</h3>
+                    <ul id="conditionalList" class="detail-list"></ul>
+                </div>
+
+                <div class="detail-card">
+                    <h3>Soft Control</h3>
+                    <ul id="softList" class="detail-list"></ul>
+                </div>
+
+                <div class="detail-card">
+                    <h3>Utility and Debuffs</h3>
+                    <ul id="utilityList" class="detail-list"></ul>
+                </div>
+
+                <div class="detail-card full-width">
+                    <h3>CC Category Guide</h3>
+
+                    <div class="legend">
+
+                        <div class="legend-item">
+                            <strong>Primary hard CC</strong>
+                            Reliable control that can remove a dangerous
+                            target from combat for a meaningful duration.
+                        </div>
+
+                        <div class="legend-item">
+                            <strong>Emergency hard CC</strong>
+                            Stuns, fears and short incapacitations used to
+                            stop immediate danger.
+                        </div>
+
+                        <div class="legend-item">
+                            <strong>Reliable interrupt</strong>
+                            Directly stops spellcasting and usually locks
+                            the affected spell school.
+                        </div>
+
+                        <div class="legend-item">
+                            <strong>Conditional CC</strong>
+                            Strong control that only works on certain enemy
+                            types or requires a specific pet or situation.
+                        </div>
+
+                        <div class="legend-item">
+                            <strong>Soft control</strong>
+                            Roots, slows and snares useful for positioning
+                            and kiting.
+                        </div>
+
+                        <div class="legend-item">
+                            <strong>Utility</strong>
+                            Buffs, dispels, debuffs and group tools that are
+                            useful but are not crowd control.
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+        <div class="button-row">
+            <button id="randomButton" type="button">
+                Random Valid Comp
+            </button>
+
+            <button
+                id="resetButton"
+                class="secondary"
+                type="button"
+            >
+                Reset Composition
+            </button>
+        </div>
+
+        <div class="notice">
+            <strong>Important:</strong>
+            this is a PvE dungeon synergy model, not a PvP ranking.
+            Talent-dependent and pet-dependent abilities are attached only
+            to relevant profiles or marked as conditional. Final Forever
+            launch tuning may still change individual abilities.
+        </div>
+
+    </main>
+
+</div>
+
+<script>
+"use strict";
+
+
+/*
+ * ============================================================
+ * PROFILE DATABASE
+ * ============================================================
+ *
+ * Categories:
+ *
+ * primaryCC:
+ * Reliable, high-value control that can remove a target from
+ * combat for a useful duration.
+ *
+ * emergencyCC:
+ * Short stuns, fears and incapacitations used to stop danger.
+ *
+ * interrupts:
+ * Reliable cast interrupts.
+ *
+ * conditionalCC:
+ * Control limited by creature type, pet choice or environment.
+ *
+ * softControl:
+ * Slows, roots and snares.
+ *
+ * utility:
+ * Buffs, dispels, recovery, debuffs and support abilities.
+ */
+
+const profileData = {
+
+    warriorProtection: {
+        name: "Warrior - Protection",
+        className: "Warrior",
+        role: "Tank",
+        armor: "Plate",
+
+        primaryCC: [],
+
+        emergencyCC: [
+            "Intimidating Shout"
+        ],
+
+        interrupts: [
+            "Shield Bash",
+            "Pummel"
+        ],
+
+        conditionalCC: [],
+
+        softControl: [
+            "Hamstring",
+            "Disarm"
+        ],
+
+        utility: [
+            "Battle Shout",
+            "Demoralizing Shout",
+            "Challenging Shout",
+            "Sunder Armor"
+        ]
+    },
+
+
+    paladinProtection: {
+        name: "Paladin - Protection",
+        className: "Paladin",
+        role: "Tank",
+        armor: "Plate",
+
+        primaryCC: [],
+
+        emergencyCC: [
+            "Hammer of Justice"
+        ],
+
+        interrupts: [],
+
+        conditionalCC: [
+            "Turn Undead - Undead only"
+        ],
+
+        softControl: [
+            "Judgement of Justice"
+        ],
+
+        utility: [
+            "Blessing of Protection",
+            "Blessing of Freedom",
+            "Blessing of Kings",
+            "Cleanse",
+            "Paladin Auras"
+        ]
+    },
+
+
+    druidFeralTank: {
+        name: "Druid - Feral Tank",
+        className: "Druid",
+        role: "Tank",
+        armor: "Leather",
+
+        primaryCC: [],
+
+        emergencyCC: [
+            "Bash"
+        ],
+
+        interrupts: [
+            "Feral Charge - Feral build"
+        ],
+
+        conditionalCC: [
+            "Hibernate - Beasts and Dragonkin",
+            "Entangling Roots - environmental limitations may apply"
+        ],
+
+        softControl: [
+            "Entangling Roots",
+            "Nature's Grasp"
+        ],
+
+        utility: [
+            "Mark of the Wild",
+            "Demoralizing Roar",
+            "Faerie Fire - armor and stealth debuff",
+            "Rebirth"
+        ]
+    },
+
+
+    priestHoly: {
+        name: "Priest - Holy",
+        className: "Priest",
+        role: "Healer",
+        armor: "Cloth",
+
+        primaryCC: [],
+
+        emergencyCC: [
+            "Psychic Scream"
+        ],
+
+        interrupts: [],
+
+        conditionalCC: [
+            "Shackle Undead - Undead only"
+        ],
+
+        softControl: [],
+
+        utility: [
+            "Dispel Magic",
+            "Abolish Disease",
+            "Power Word: Fortitude",
+            "Power Word: Shield",
+            "Fear Ward",
+            "Prayer of Mending",
+            "Binding Heal"
+        ]
+    },
+
+
+    priestDiscipline: {
+        name: "Priest - Discipline",
+        className: "Priest",
+        role: "Healer",
+        armor: "Cloth",
+
+        primaryCC: [],
+
+        emergencyCC: [
+            "Psychic Scream"
+        ],
+
+        interrupts: [],
+
+        conditionalCC: [
+            "Shackle Undead - Undead only"
+        ],
+
+        softControl: [],
+
+        utility: [
+            "Dispel Magic",
+            "Abolish Disease",
+            "Power Word: Fortitude",
+            "Power Word: Shield",
+            "Penance",
+            "Power Infusion"
+        ]
+    },
+
+
+    paladinHoly: {
+        name: "Paladin - Holy",
+        className: "Paladin",
+        role: "Healer",
+        armor: "Plate",
+
+        primaryCC: [],
+
+        emergencyCC: [
+            "Hammer of Justice"
+        ],
+
+        interrupts: [],
+
+        conditionalCC: [
+            "Turn Undead - Undead only"
+        ],
+
+        softControl: [
+            "Judgement of Justice"
+        ],
+
+        utility: [
+            "Cleanse",
+            "Purify",
+            "Blessing of Protection",
+            "Blessing of Freedom",
+            "Lay on Hands",
+            "Paladin Auras"
+        ]
+    },
+
+
+    shamanRestoration: {
+        name: "Shaman - Restoration",
+        className: "Shaman",
+        role: "Healer",
+        armor: "Mail",
+
+        primaryCC: [],
+
+        emergencyCC: [],
+
+        interrupts: [
+            "Earth Shock"
+        ],
+
+        conditionalCC: [
+            "Stoneclaw Totem - situational PvE distraction"
+        ],
+
+        softControl: [
+            "Earthbind Totem",
+            "Frost Shock"
+        ],
+
+        utility: [
+            "Tremor Totem",
+            "Grounding Totem",
+            "Cure Poison",
+            "Cure Disease",
+            "Purge",
+            "Reincarnation",
+            "Totem support"
+        ]
+    },
+
+
+    druidRestoration: {
+        name: "Druid - Restoration",
+        className: "Druid",
+        role: "Healer",
+        armor: "Leather",
+
+        primaryCC: [],
+
+        emergencyCC: [
+            "Bash - requires Bear Form and melee range"
+        ],
+
+        interrupts: [],
+
+        conditionalCC: [
+            "Hibernate - Beasts and Dragonkin",
+            "Entangling Roots - environmental limitations may apply"
+        ],
+
+        softControl: [
+            "Entangling Roots",
+            "Nature's Grasp"
+        ],
+
+        utility: [
+            "Remove Curse",
+            "Abolish Poison",
+            "Mark of the Wild",
+            "Rebirth",
+            "Innervate",
+            "Wild Growth"
+        ]
+    },
+
+
+    mageArcane: {
+        name: "Mage - Arcane",
+        className: "Mage",
+        role: "DPS",
+        armor: "Cloth",
+
+        primaryCC: [
+            "Polymorph"
+        ],
+
+        emergencyCC: [
+            "Frost Nova"
+        ],
+
+        interrupts: [
+            "Counterspell"
+        ],
+
+        conditionalCC: [],
+
+        softControl: [
+            "Frostbolt",
+            "Cone of Cold"
+        ],
+
+        utility: [
+            "Arcane Intellect",
+            "Remove Lesser Curse",
+            "Conjured Food and Water",
+            "Amplify Magic",
+            "Dampen Magic"
+        ]
+    },
+
+
+    mageFire: {
+        name: "Mage - Fire",
+        className: "Mage",
+        role: "DPS",
+        armor: "Cloth",
+
+        primaryCC: [
+            "Polymorph"
+        ],
+
+        emergencyCC: [
+            "Frost Nova"
+        ],
+
+        interrupts: [
+            "Counterspell"
+        ],
+
+        conditionalCC: [],
+
+        softControl: [
+            "Frostbolt",
+            "Cone of Cold"
+        ],
+
+        utility: [
+            "Arcane Intellect",
+            "Remove Lesser Curse",
+            "Conjured Food and Water",
+            "Amplify Magic",
+            "Dampen Magic"
+        ]
+    },
+
+
+    mageFrost: 
